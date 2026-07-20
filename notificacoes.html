@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>ART | Notificações</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f5f4f1;
+      --surface: #ffffff;
+      --border: #e8e6e0;
+      --text: #1a1a1a;
+      --text-muted: #888;
+      --nav-height: 64px;
+      --notif-bg: #dff0ff;
+    }
+    html { -webkit-tap-highlight-color: transparent; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: var(--nav-height);
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      height: 52px;
+    }
+    .header-left { display: flex; align-items: center; gap: 8px; }
+    .btn-icon {
+      background: none; border: none;
+      cursor: pointer; font-size: 20px;
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text); transition: background .15s;
+    }
+    .btn-icon:active { background: var(--bg); }
+    .header-title { font-size: 15px; font-weight: 700; }
+    .btn-novos-seguidores {
+      display: flex; align-items: center; gap: 6px;
+      background: none; border: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px; font-weight: 600;
+      color: var(--text); cursor: pointer;
+      padding: 6px 0;
+    }
+    .notif-list {
+      display: flex;
+      flex-direction: column;
+      padding: 10px 14px;
+      gap: 8px;
+    }
+    .notif-item {
+      background: var(--notif-bg);
+      border-radius: 14px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      cursor: pointer;
+      transition: filter .15s;
+    }
+    .notif-item:active { filter: brightness(.96); }
+    .notif-item.nao-lida { background: #c8e6ff; }
+    .notif-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .notif-texto {
+      font-size: 13px;
+      line-height: 1.4;
+      flex: 1;
+    }
+    .notif-tempo {
+      font-size: 11px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .notif-preview {
+      font-size: 12px;
+      color: #555;
+      margin-top: 2px;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 64px 20px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+    .empty-icon { font-size: 40px; margin-bottom: 10px; }
+    .bottom-nav {
+      position: fixed;
+      bottom: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 100%; max-width: 480px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      height: var(--nav-height);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      z-index: 100;
+    }
+    .nav-item {
+      flex: 1; display: flex;
+      align-items: center; justify-content: center;
+      height: 100%; text-decoration: none;
+      font-size: 22px; cursor: pointer;
+      color: var(--text-muted);
+      transition: color .2s, transform .15s;
+      background: none; border: none;
+    }
+    .nav-item.active { color: var(--text); }
+    .nav-item:active { transform: scale(.88); }
+    .nav-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 2.5px; width: 18px; height: 18px;
+    }
+    .nav-grid span { background: currentColor; border-radius: 2px; display: block; }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-left">
+      <button class="btn-icon" onclick="history.back()">&#8592;</button>
+      <span class="header-title">Notificações</span>
+    </div>
+    <button class="btn-novos-seguidores" onclick="window.location.href='novos-seguidores.html'">
+      ➕👤 Seguidores novos
+    </button>
+  </header>
+
+  <div class="notif-list" id="notifList">
+    <div class="empty-state">
+      <div class="empty-icon">🔔</div>
+      <p>Carregando notificações...</p>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a class="nav-item" href="index.html">🏠</a>
+    <a class="nav-item" href="search.html">🔍</a>
+    <a class="nav-item" href="index.html">
+      <div class="nav-grid"><span></span><span></span><span></span><span></span></div>
+    </a>
+    <a class="nav-item active" href="notificacoes.html">🤍</a>
+    <a class="nav-item" href="perfil.html">👤</a>
+  </nav>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script>
+    const sb = supabase.createClient(
+      "https://mgktoegtmuzrwxsbqaii.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1na3RvZWd0bXV6cnd4c2JxYWlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNTA0NDcsImV4cCI6MjA5MDcyNjQ0N30.vSkBfTvgyzRGxa8xQ2CwfNvIZjsAMOuTTvs7Ldyg9AU"
+    );
+
+    let usuario = null;
+
+    async function init() {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session?.user) { window.location.replace("login.html"); return; }
+      const data = { user: session.user };
+      usuario = data.user;
+      await carregarNotificacoes();
+      escutarNovas();
+    }
+
+    async function carregarNotificacoes() {
+      const el = document.getElementById('notifList');
+      const { data: notifs, error } = await sb
+        .from('notificacoes')
+        .select('*')
+        .eq('destinatario_id', usuario.id)
+        .order('criado_em', { ascending: false })
+        .limit(50);
+
+      if (error || !notifs || notifs.length === 0) {
+        el.innerHTML = `<div class="empty-state"><div class="empty-icon">🔔</div><p>Nenhuma notificação ainda.</p></div>`;
+        return;
+      }
+
+      el.innerHTML = '';
+      notifs.forEach(n => renderNotif(n, el));
+
+      await sb.from('notificacoes')
+        .update({ lida: true })
+        .eq('destinatario_id', usuario.id)
+        .eq('lida', false);
+    }
+
+    function renderNotif(n, container) {
+      const item = document.createElement('div');
+      item.className = `notif-item${n.lida ? '' : ' nao-lida'}`;
+      item.onclick = () => abrirNotif(n);
+      item.innerHTML = `
+        <div class="notif-row">
+          <span class="notif-texto">${escapeHtml(textoNotif(n))}</span>
+          <span class="notif-tempo">${tempoRelativo(n.criado_em)}</span>
+        </div>
+        ${n.tipo === 'comentario' && n.extra ? `<div class="notif-preview">"${escapeHtml(n.extra)}"</div>` : ''}
+      `;
+      container.appendChild(item);
+    }
+
+    function textoNotif(n) {
+      const u = n.remetente_username || 'Alguém';
+      switch (n.tipo) {
+        case 'curtida':    return `${u} curtiu sua publicação`;
+        case 'comentario': return `${u} comentou na sua publicação`;
+        case 'seguidor':   return `${u} começou a seguir você`;
+        case 'mensagem':   return `${u} enviou uma mensagem`;
+        default:           return n.texto || 'Nova notificação';
+      }
+    }
+
+    function abrirNotif(n) {
+      if (n.tipo === 'mensagem') {
+        window.location.href = `chat.html?id=${n.remetente_id}`;
+      } else if (n.post_id) {
+        window.location.href = `index.html`;
+      } else if (n.remetente_id) {
+        window.location.href = `perfil.html?id=${n.remetente_id}`;
+      }
+    }
+
+    function escutarNovas() {
+      sb.channel('notificacoes')
+        .on('postgres_changes', {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'notificacoes',
+          filter: `destinatario_id=eq.${usuario.id}`
+        }, payload => {
+          const el = document.getElementById('notifList');
+          const vazio = el.querySelector('.empty-state');
+          if (vazio) el.innerHTML = '';
+          renderNotif(payload.new, el);
+        })
+        .subscribe();
+    }
+
+    function tempoRelativo(iso) {
+      const diff = Math.floor((Date.now() - new Date(iso)) / 1000);
+      if (diff < 60) return 'agora';
+      if (diff < 3600) return `Há ${Math.floor(diff/60)} min`;
+      if (diff < 86400) return `Há ${Math.floor(diff/3600)} h`;
+      return `Há ${Math.floor(diff/86400)} d`;
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+    }
+
+    init();
+  </script>
+</body>
+</html>

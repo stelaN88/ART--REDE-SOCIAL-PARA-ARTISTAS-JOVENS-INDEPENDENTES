@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>ART | Mensagens</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f5f4f1;
+      --surface: #ffffff;
+      --border: #e8e6e0;
+      --text: #1a1a1a;
+      --text-muted: #888;
+      --search-bg: #c8f5c8;
+      --nav-height: 64px;
+    }
+    html { -webkit-tap-highlight-color: transparent; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: var(--nav-height);
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    .header {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 8px;
+      padding: 0 16px; height: 52px;
+    }
+    .btn-icon {
+      background: none; border: none; cursor: pointer;
+      font-size: 20px; width: 34px; height: 34px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text); transition: background .15s; flex-shrink: 0;
+    }
+    .btn-icon:active { background: var(--bg); }
+    .search-bar {
+      flex: 1; display: flex; align-items: center; gap: 8px;
+      background: var(--search-bg);
+      border-radius: 20px; padding: 8px 14px;
+    }
+    .search-input {
+      flex: 1; border: none; outline: none;
+      background: none; font-family: 'DM Sans', sans-serif;
+      font-size: 13px; color: var(--text);
+    }
+    .search-input::placeholder { color: rgba(26,26,26,.45); }
+    .conv-list { display: flex; flex-direction: column; }
+    .conv-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 13px 16px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer; text-decoration: none; color: inherit;
+      transition: background .15s;
+    }
+    .conv-item:active { background: var(--bg); }
+    .conv-avatar {
+      width: 48px; height: 48px; border-radius: 50%;
+      object-fit: cover; background: #e0ddd6; flex-shrink: 0;
+    }
+    .conv-info { flex: 1; min-width: 0; }
+    .conv-name { font-size: 14px; font-weight: 700; }
+    .conv-preview {
+      font-size: 12px; color: var(--text-muted);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      margin-top: 2px;
+    }
+    .conv-meta {
+      display: flex; flex-direction: column;
+      align-items: flex-end; gap: 4px; flex-shrink: 0;
+    }
+    .conv-tempo { font-size: 11px; color: var(--text-muted); }
+    .conv-badge {
+      background: #1a1a1a; color: #fff;
+      border-radius: 10px; padding: 1px 7px;
+      font-size: 11px; font-weight: 700;
+    }
+    .empty-state {
+      text-align: center; padding: 64px 20px;
+      color: var(--text-muted); font-size: 14px;
+    }
+    .empty-icon { font-size: 40px; margin-bottom: 10px; }
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 100%; max-width: 480px;
+      background: var(--surface); border-top: 1px solid var(--border);
+      display: flex; justify-content: space-around; align-items: center;
+      height: var(--nav-height); padding-bottom: env(safe-area-inset-bottom, 0px);
+      z-index: 100;
+    }
+    .nav-item {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      height: 100%; text-decoration: none; font-size: 22px;
+      cursor: pointer; color: var(--text-muted);
+      transition: color .2s, transform .15s; background: none; border: none;
+    }
+    .nav-item.active { color: var(--text); }
+    .nav-item:active { transform: scale(.88); }
+    .nav-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5px; width: 18px; height: 18px; }
+    .nav-grid span { background: currentColor; border-radius: 2px; display: block; }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <button class="btn-icon" onclick="history.back()">&#8592;</button>
+    <div class="search-bar">
+      <span style="font-size:14px;opacity:.5">🔍</span>
+      <input class="search-input" id="searchInput" placeholder="Procurar..." oninput="filtrar()">
+    </div>
+  </header>
+
+  <div class="conv-list" id="convList">
+    <div class="empty-state">
+      <div class="empty-icon">💬</div>
+      <p>Carregando conversas...</p>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a class="nav-item" href="index.html">🏠</a>
+    <a class="nav-item" href="search.html">🔍</a>
+    <a class="nav-item" href="index.html">
+      <div class="nav-grid"><span></span><span></span><span></span><span></span></div>
+    </a>
+    <a class="nav-item active" href="notificacoes.html">🤍</a>
+    <a class="nav-item" href="perfil.html">👤</a>
+  </nav>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script>
+    const sb = supabase.createClient(
+      "https://mgktoegtmuzrwxsbqaii.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1na3RvZWd0bXV6cnd4c2JxYWlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNTA0NDcsImV4cCI6MjA5MDcyNjQ0N30.vSkBfTvgyzRGxa8xQ2CwfNvIZjsAMOuTTvs7Ldyg9AU"
+    );
+
+    let usuario = null;
+    let todasConversas = [];
+
+    async function init() {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session?.user) { window.location.replace("login.html"); return; }
+      const data = { user: session.user };
+      usuario = data.user;
+      await carregarConversas();
+      escutarNovas();
+    }
+
+    async function carregarConversas() {
+      const el = document.getElementById('convList');
+      const { data: msgs, error } = await sb
+        .from('mensagens')
+        .select('*')
+        .or(`remetente_id.eq.${usuario.id},destinatario_id.eq.${usuario.id}`)
+        .order('criado_em', { ascending: false });
+
+      if (error || !msgs || msgs.length === 0) {
+        el.innerHTML = `<div class="empty-state"><div class="empty-icon">💬</div><p>Nenhuma conversa ainda.</p></div>`;
+        return;
+      }
+
+      const mapaConversas = {};
+      msgs.forEach(m => {
+        const outroId = m.remetente_id === usuario.id ? m.destinatario_id : m.remetente_id;
+        const outroUsername = m.remetente_id === usuario.id ? m.destinatario_username : m.remetente_username;
+        const outroAvatar = m.remetente_id === usuario.id ? m.destinatario_avatar : m.remetente_avatar;
+        if (!mapaConversas[outroId]) {
+          mapaConversas[outroId] = {
+            id: outroId,
+            username: outroUsername || 'usuário',
+            avatar: outroAvatar || '',
+            ultimaMensagem: m.texto,
+            tempo: m.criado_em,
+            naolidas: 0
+          };
+        }
+        if (!m.lida && m.destinatario_id === usuario.id) {
+          mapaConversas[outroId].naolidas++;
+        }
+      });
+
+      todasConversas = Object.values(mapaConversas);
+      renderConversas(todasConversas);
+    }
+
+    function renderConversas(lista) {
+      const el = document.getElementById('convList');
+      if (lista.length === 0) {
+        el.innerHTML = `<div class="empty-state"><div class="empty-icon">💬</div><p>Nenhuma conversa encontrada.</p></div>`;
+        return;
+      }
+      el.innerHTML = '';
+      lista.forEach(c => {
+        const inicial = (c.username || 'U')[0].toUpperCase();
+        const avatar = c.avatar || `https://ui-avatars.com/api/?name=${inicial}&background=e8e6e0&color=1a1a1a`;
+        const a = document.createElement('a');
+        a.className = 'conv-item';
+        a.href = `chat.html?id=${encodeURIComponent(c.id)}`;
+        a.innerHTML = `
+          <img class="conv-avatar" src="${avatar}"
+               onerror="this.src='https://ui-avatars.com/api/?name=${inicial}&background=e8e6e0&color=1a1a1a'">
+          <div class="conv-info">
+            <div class="conv-name">${escapeHtml(c.username)}</div>
+            <div class="conv-preview">${escapeHtml(c.ultimaMensagem || '')}</div>
+          </div>
+          <div class="conv-meta">
+            <span class="conv-tempo">${tempoRelativo(c.tempo)}</span>
+            ${c.naolidas > 0 ? `<span class="conv-badge">${c.naolidas}</span>` : ''}
+          </div>`;
+        el.appendChild(a);
+      });
+    }
+
+    function filtrar() {
+      const termo = document.getElementById('searchInput').value.toLowerCase();
+      renderConversas(todasConversas.filter(c => c.username.toLowerCase().includes(termo)));
+    }
+
+    function escutarNovas() {
+      sb.channel('mensagens_novas')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mensagens',
+          filter: `destinatario_id=eq.${usuario.id}` }, () => carregarConversas())
+        .subscribe();
+    }
+
+    function tempoRelativo(iso) {
+      const diff = Math.floor((Date.now() - new Date(iso)) / 1000);
+      if (diff < 60) return 'agora';
+      if (diff < 3600) return `${Math.floor(diff/60)}min`;
+      if (diff < 86400) return `${Math.floor(diff/3600)}h`;
+      return `${Math.floor(diff/86400)}d`;
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+    }
+
+    init();
+  </script>
+</body>
+</html>

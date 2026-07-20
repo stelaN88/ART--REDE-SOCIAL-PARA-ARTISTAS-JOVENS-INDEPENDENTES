@@ -1,0 +1,856 @@
+<<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>ART | Home</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f4f1;
+      --surface: #ffffff;
+      --border: #e8e6e0;
+      --text: #1a1a1a;
+      --text-muted: #888;
+      --accent: #1a1a1a;
+      --like: #e0294a;
+      --radius-card: 12px;
+      --nav-height: 64px;
+    }
+
+    html { -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: var(--nav-height);
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      height: 52px;
+    }
+
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .logo-star { font-size: 14px; color: #1a1a1a; }
+
+    .add-btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 34px; height: 34px;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .2s, transform .15s;
+      line-height: 1;
+    }
+    .add-btn:active { transform: scale(.92); }
+
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.55);
+      z-index: 200;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--surface);
+      border-radius: 20px 20px 0 0;
+      padding: 24px 20px 36px;
+      width: 100%;
+      max-width: 480px;
+      display: flex; flex-direction: column; gap: 14px;
+      animation: slideUp .28s cubic-bezier(.22,1,.36,1);
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to   { transform: translateY(0); }
+    }
+
+    .modal-handle {
+      width: 36px; height: 4px;
+      background: #ddd; border-radius: 2px;
+      margin: 0 auto -4px;
+    }
+    .modal h3 { font-family: 'Playfair Display', serif; font-size: 19px; }
+
+    .modal textarea {
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      resize: none;
+      height: 80px;
+      outline: none;
+      transition: border-color .2s;
+      background: var(--bg);
+    }
+    .modal textarea:focus { border-color: var(--accent); }
+
+    .modal-preview {
+      display: none;
+      width: 100%;
+      max-height: 220px;
+      object-fit: cover;
+      border-radius: 10px;
+      background: #f0f0f0;
+    }
+    .modal-preview.visible { display: block; }
+
+    .modal-file-label {
+      display: flex; align-items: center; gap: 10px;
+      cursor: pointer; font-size: 13px; color: #666;
+      border: 1.5px dashed #ccc;
+      border-radius: 10px;
+      padding: 11px 14px;
+      transition: border-color .2s, color .2s;
+    }
+    .modal-file-label:hover { border-color: var(--accent); color: var(--accent); }
+    .modal-file-label input { display: none; }
+
+    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+    .btn-cancel {
+      background: none; border: 1.5px solid var(--border);
+      padding: 9px 18px; border-radius: 8px;
+      cursor: pointer; font-size: 13px;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .btn-post {
+      background: var(--accent); color: #fff;
+      border: none; padding: 9px 22px;
+      border-radius: 8px; cursor: pointer;
+      font-size: 13px; font-weight: 700;
+      font-family: 'DM Sans', sans-serif;
+      transition: background .2s;
+    }
+    .btn-post:disabled { background: #aaa; cursor: not-allowed; }
+
+    .suggestions {
+      padding: 16px 16px 10px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .suggestions h2 {
+      font-size: 10px;
+      letter-spacing: .14em;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .users {
+      display: flex;
+      gap: 18px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      scrollbar-width: none;
+    }
+    .users::-webkit-scrollbar { display: none; }
+
+    .user {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 5px;
+      min-width: 58px;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      flex-shrink: 0;
+    }
+
+    .user-avatar-wrap { position: relative; width: 54px; height: 54px; }
+    .user img {
+      width: 54px; height: 54px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--border);
+      transition: border-color .2s, transform .2s;
+      display: block;
+    }
+    .user:hover img { border-color: var(--accent); transform: scale(1.05); }
+    .user span {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-align: center;
+      max-width: 58px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .feed-filter {
+      display: flex;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 52px;
+      z-index: 90;
+    }
+
+    .feed-filter span {
+      flex: 1;
+      text-align: center;
+      padding: 11px 0;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: color .2s, border-color .2s;
+      user-select: none;
+    }
+    .feed-filter span.active {
+      color: var(--text);
+      border-bottom-color: var(--text);
+      font-weight: 700;
+    }
+
+    .feed {
+      padding: 8px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .feed-msg {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 48px 20px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .post {
+      background: var(--surface);
+      border-radius: var(--radius-card);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .post-img-wrap {
+      width: 100%;
+      overflow: hidden;
+      min-height: 120px;
+      cursor: pointer;
+    }
+    .post-img {
+      width: 100%;
+      aspect-ratio: 4 / 5;
+      object-fit: cover;
+      display: block;
+      background: #e8e6e0;
+      transition: transform .2s;
+    }
+    .post-img-wrap:hover .post-img { transform: scale(1.03); }
+
+    .post-footer {
+      padding: 7px 9px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .post-username {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .post-descricao {
+      font-size: 10px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .post-actions { display: flex; flex-direction: column; gap: 1px; }
+
+    .btn-action {
+      background: none; border: none;
+      cursor: pointer;
+      font-size: 12px;
+      display: flex; align-items: center; gap: 4px;
+      color: var(--text-muted);
+      padding: 0;
+      font-family: 'DM Sans', sans-serif;
+      transition: transform .15s;
+    }
+    .btn-action:active { transform: scale(.92); }
+    .btn-action.curtido { color: var(--like); }
+    .btn-action .icon { font-size: 13px; }
+    .btn-action .label { font-size: 11px; color: var(--text-muted); }
+
+    .comentarios-section {
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      padding: 0 9px 9px;
+      border-top: 1px solid var(--bg);
+    }
+    .comentarios-section.open { display: flex; }
+
+    .comentario-item {
+      font-size: 11px;
+      color: #333;
+      background: var(--bg);
+      border-radius: 7px;
+      padding: 5px 7px;
+      line-height: 1.4;
+    }
+    .comentario-item strong { color: var(--text); }
+
+    .comentario-input-row { display: flex; gap: 5px; margin-top: 1px; }
+    .comentario-input {
+      flex: 1;
+      border: 1.5px solid var(--border);
+      border-radius: 7px;
+      padding: 5px 8px;
+      font-size: 11px;
+      font-family: 'DM Sans', sans-serif;
+      outline: none;
+      background: var(--bg);
+      transition: border-color .2s;
+    }
+    .comentario-input:focus { border-color: var(--accent); }
+    .btn-enviar {
+      background: var(--accent); color: #fff;
+      border: none; border-radius: 7px;
+      padding: 5px 9px;
+      font-size: 11px; font-weight: 700;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      height: var(--nav-height);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      z-index: 100;
+    }
+
+    .nav-item {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      text-decoration: none;
+      font-size: 22px;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: color .2s, transform .15s;
+      background: none;
+      border: none;
+    }
+    .nav-item.active { color: var(--text); }
+    .nav-item:active { transform: scale(.88); }
+
+    .nav-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2.5px;
+      width: 18px; height: 18px;
+    }
+    .nav-grid span { background: currentColor; border-radius: 2px; display: block; }
+
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 52px 20px;
+      color: var(--text-muted);
+    }
+    .empty-state .empty-icon { font-size: 38px; margin-bottom: 10px; }
+    .empty-state p { font-size: 13px; }
+
+    /* ── LIGHTBOX ─────────────────────────────────────── */
+    .lb-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      align-items: center;
+      justify-content: center;
+    }
+    .lb-overlay.open { display: flex; }
+
+    .lb-bg {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      filter: blur(24px) brightness(.4);
+      transform: scale(1.1);
+    }
+
+    .lb-box {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 420px;
+      margin: 16px;
+      border-radius: 18px;
+      overflow: hidden;
+      background: rgba(20,20,20,.7);
+      backdrop-filter: blur(4px);
+      box-shadow: 0 20px 60px rgba(0,0,0,.5);
+      animation: lbIn .22s cubic-bezier(.22,1,.36,1);
+    }
+    @keyframes lbIn {
+      from { opacity: 0; transform: scale(.93); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    .lb-img {
+      width: 100%;
+      max-height: 65vh;
+      object-fit: contain;
+      display: block;
+      background: #000;
+    }
+
+    .lb-info {
+      padding: 12px 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .lb-username {
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .lb-descricao {
+      font-size: 13px;
+      color: rgba(255,255,255,.75);
+      line-height: 1.5;
+    }
+
+    .lb-actions {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      margin-top: 2px;
+    }
+
+    .lb-btn {
+      background: none; border: none;
+      color: #fff; font-size: 20px;
+      cursor: pointer;
+      display: flex; align-items: center; gap: 5px;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .lb-btn .cnt { font-size: 12px; color: rgba(255,255,255,.6); }
+    .lb-btn.curtido { color: var(--like); }
+
+    .lb-close {
+      position: absolute;
+      top: 10px; right: 10px;
+      background: rgba(0,0,0,.5);
+      border: none;
+      border-radius: 50%;
+      width: 30px; height: 30px;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <div class="logo">ART <span class="logo-star">✦</span></div>
+    <button class="add-btn" onclick="abrirModal()" aria-label="Novo post">＋</button>
+  </header>
+
+  <div class="modal-overlay" id="modalOverlay" onclick="fecharSeOverlay(event)">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <h3>Novo post</h3>
+      <label class="modal-file-label" for="inputImagem">
+        <span>🖼️</span> <span>Escolher imagem</span>
+        <input type="file" id="inputImagem" accept="image/*" onchange="previewImagem(event)">
+      </label>
+      <img id="previewImg" class="modal-preview" alt="preview">
+      <textarea id="postDescricao" placeholder="Escreva uma descrição..."></textarea>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="fecharModal()">Cancelar</button>
+        <button class="btn-post" id="btnPostar" onclick="criarPost()">Publicar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIGHTBOX -->
+  <div class="lb-overlay" id="lbOverlay" onclick="fecharLbOverlay(event)">
+    <div class="lb-bg" id="lbBg"></div>
+    <div class="lb-box">
+      <button class="lb-close" onclick="fecharLb()">✕</button>
+      <img class="lb-img" id="lbImg" src="" alt="">
+      <div class="lb-info">
+        <div class="lb-username" id="lbUsername"></div>
+        <div class="lb-descricao" id="lbDescricao"></div>
+        <div class="lb-actions">
+          <button class="lb-btn" id="lbBtnCurtir" onclick="toggleCurtidaLb()">
+            🤍 <span class="cnt" id="lbCnt">0</span>
+          </button>
+          <button class="lb-btn" onclick="fecharLb()">💬</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <section class="suggestions">
+      <h2>Sugestões</h2>
+      <div class="users" id="sugestoes"></div>
+    </section>
+
+    <div class="feed-filter">
+      <span id="aba-seguindo" onclick="trocarAba('seguindo')">Seguindo</span>
+      <span id="aba-paravoc" class="active" onclick="trocarAba('paravoc')">Para você</span>
+    </div>
+
+    <section class="feed" id="feed">
+      <p class="feed-msg">Carregando...</p>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <a class="nav-item active" href="#" aria-label="Home">🏠</a>
+    <a class="nav-item" href="search.html" aria-label="Buscar">🔍</a>
+    <a class="nav-item" href="#" onclick="abrirModal(); return false;" aria-label="Novo post">
+      <div class="nav-grid"><span></span><span></span><span></span><span></span></div>
+    </a>
+    <a class="nav-item" href="notificacoes.html" aria-label="Notificações">🤍</a>
+    <a class="nav-item" href="perfil.html" aria-label="Perfil">👤</a>
+  </nav>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script>
+    const supabaseClient = supabase.createClient(
+      "https://mgktoegtmuzrwxsbqaii.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1na3RvZWd0bXV6cnd4c2JxYWlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNTA0NDcsImV4cCI6MjA5MDcyNjQ0N30.vSkBfTvgyzRGxa8xQ2CwfNvIZjsAMOuTTvs7Ldyg9AU"
+    );
+
+    let usuarioAtual = null;
+    let abaAtiva = 'paravoc';
+    let postAtual = null;
+
+    async function init() {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (!session?.user) { window.location.replace("login.html"); return; }
+      usuarioAtual = session.user;
+      carregarSugestoes();
+      carregarFeed();
+    }
+
+    init();
+
+    async function carregarSugestoes() {
+      const el = document.getElementById('sugestoes');
+      const { data: perfis } = await supabaseClient
+        .from('perfis').select('user_id, username, avatar_url')
+        .neq('user_id', usuarioAtual.id).limit(10);
+
+      const lista = (perfis && perfis.length > 0) ? perfis : [
+        { user_id: 'demo1', username: 'Heleninha_D', avatar_url: '' },
+        { user_id: 'demo2', username: 'marcopintor', avatar_url: '' },
+        { user_id: 'demo3', username: 'username',    avatar_url: '' },
+      ];
+
+      el.innerHTML = '';
+      lista.forEach(p => {
+        const inicial = (p.username || 'U')[0].toUpperCase();
+        const avatar = p.avatar_url || `https://ui-avatars.com/api/?name=${inicial}&background=e8e6e0&color=1a1a1a&size=54`;
+        const a = document.createElement('a');
+        a.className = 'user';
+        a.href = `perfil.html?id=${encodeURIComponent(p.user_id)}`;
+        a.innerHTML = `
+          <div class="user-avatar-wrap">
+            <img src="${avatar}" onerror="this.src='https://ui-avatars.com/api/?name=${inicial}&background=e8e6e0&color=1a1a1a'" alt="${escapeHtml(p.username)}">
+          </div>
+          <span>${escapeHtml(p.username)}</span>`;
+        el.appendChild(a);
+      });
+    }
+
+    function trocarAba(aba) {
+      abaAtiva = aba;
+      document.getElementById('aba-paravoc').classList.toggle('active', aba === 'paravoc');
+      document.getElementById('aba-seguindo').classList.toggle('active', aba === 'seguindo');
+      carregarFeed();
+    }
+
+    function abrirModal() { document.getElementById("modalOverlay").classList.add("open"); }
+    function fecharModal() {
+      document.getElementById("modalOverlay").classList.remove("open");
+      document.getElementById("postDescricao").value = "";
+      document.getElementById("inputImagem").value = "";
+      const prev = document.getElementById("previewImg");
+      prev.src = ""; prev.classList.remove("visible");
+    }
+    function fecharSeOverlay(e) {
+      if (e.target === document.getElementById("modalOverlay")) fecharModal();
+    }
+    function previewImagem(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        const prev = document.getElementById("previewImg");
+        prev.src = e.target.result; prev.classList.add("visible");
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function criarPost() {
+      const inputImagem = document.getElementById("inputImagem");
+      const arquivo = inputImagem.files[0];
+      const descricao = document.getElementById("postDescricao").value.trim();
+      const btnPostar = document.getElementById("btnPostar");
+      if (!arquivo) { alert("Selecione uma imagem."); return; }
+      btnPostar.disabled = true; btnPostar.textContent = "Publicando...";
+      try {
+        const nome = `${usuarioAtual.id}_${Date.now()}_${arquivo.name}`;
+        const { error: upErr } = await supabaseClient.storage.from("posts").upload(nome, arquivo);
+        if (upErr) throw upErr;
+        const { data: urlData } = supabaseClient.storage.from("posts").getPublicUrl(nome);
+        const { error: insErr } = await supabaseClient.from("posts")
+          .insert({ user_id: usuarioAtual.id, imagem_url: urlData.publicUrl, descricao });
+        if (insErr) throw insErr;
+        fecharModal(); carregarFeed();
+      } catch (err) {
+        alert("Erro ao publicar: " + err.message);
+      } finally {
+        btnPostar.disabled = false; btnPostar.textContent = "Publicar";
+      }
+    }
+
+    async function carregarFeed() {
+      const feedEl = document.getElementById("feed");
+      feedEl.innerHTML = '<p class="feed-msg">Carregando...</p>';
+
+      let query = supabaseClient.from("posts").select("*").order("criado_em", { ascending: false });
+
+      if (abaAtiva === 'seguindo') {
+        const { data: follows } = await supabaseClient
+          .from("follows").select("seguido_id").eq("seguidor_id", usuarioAtual.id);
+        const ids = (follows || []).map(f => f.seguido_id);
+        if (ids.length === 0) {
+          feedEl.innerHTML = `<div class="empty-state"><div class="empty-icon">🎨</div><p>Siga artistas para ver os posts deles aqui!</p></div>`;
+          return;
+        }
+        query = query.in("user_id", ids);
+      }
+
+      const { data: posts, error } = await query;
+      if (error || !posts || posts.length === 0) {
+        feedEl.innerHTML = `<p class="feed-msg">${error ? 'Erro ao carregar.' : 'Nenhum post ainda. Seja o primeiro! 🎨'}</p>`;
+        return;
+      }
+
+      const { data: curtidas } = await supabaseClient
+        .from("curtidas").select("post_id").eq("user_id", usuarioAtual.id);
+      const curtidasSet = new Set((curtidas || []).map(c => c.post_id));
+
+      // busca usernames de todos os autores dos posts
+      const userIds = [...new Set(posts.map(p => p.user_id))];
+      const { data: perfis } = await supabaseClient
+        .from("perfis").select("user_id, username, avatar_url").in("user_id", userIds);
+      const perfilMap = {};
+      (perfis || []).forEach(p => { perfilMap[p.user_id] = p; });
+
+      feedEl.innerHTML = "";
+
+      for (const post of posts) {
+        const { count: numCurtidas } = await supabaseClient
+          .from("curtidas").select("*", { count: "exact", head: true }).eq("post_id", post.id);
+
+        const { data: comentarios } = await supabaseClient
+          .from("comentarios").select("*").eq("post_id", post.id).order("criado_em", { ascending: true });
+
+        const jaCurtiu = curtidasSet.has(post.id);
+        const perfilAutor = perfilMap[post.user_id];
+        const label = post.user_id === usuarioAtual.id ? "Você"
+          : (perfilAutor?.username || "usuário");
+
+        const comentariosHtml = (comentarios || []).map(c => `
+          <div class="comentario-item">
+            <strong>${c.user_id === usuarioAtual.id ? "Você" : c.user_id.substring(0, 8) + "…"}</strong>
+            ${escapeHtml(c.texto)}
+          </div>`).join("");
+
+        const dadosPost = JSON.stringify({
+          id: post.id,
+          imagem_url: post.imagem_url || '',
+          descricao: post.descricao || '',
+          user_id: post.user_id,
+          username: label,
+          numCurtidas: numCurtidas || 0,
+          jaCurtiu
+        }).replace(/'/g, '&#39;');
+
+        const art = document.createElement("article");
+        art.className = "post";
+        art.id = `post-${post.id}`;
+        art.innerHTML = `
+          <div class="post-img-wrap" onclick='abrirLb(${dadosPost})'>
+            ${post.imagem_url
+              ? `<img class="post-img" src="${post.imagem_url}" alt="post" loading="lazy">`
+              : `<div class="post-img" style="display:flex;align-items:center;justify-content:center;color:#bbb;font-size:11px;">sem imagem</div>`}
+          </div>
+          <div class="post-footer">
+            <div class="post-username">${escapeHtml(label)}</div>
+            ${post.descricao ? `<div class="post-descricao">${escapeHtml(post.descricao)}</div>` : ''}
+            <div class="post-actions">
+              <button class="btn-action ${jaCurtiu ? 'curtido' : ''}" onclick="toggleCurtida('${post.id}', this)">
+                <span class="icon">${jaCurtiu ? '❤️' : '🤍'}</span>
+                <span class="label num-curtidas">${numCurtidas || 0} curtidas</span>
+              </button>
+              <button class="btn-action" onclick="toggleComentarios('${post.id}')">
+                <span class="icon">💬</span>
+                <span class="label">Comentários</span>
+              </button>
+            </div>
+          </div>
+          <div class="comentarios-section" id="comentarios-${post.id}">
+            <div class="comentarios-lista" id="lista-${post.id}">${comentariosHtml}</div>
+            <div class="comentario-input-row">
+              <input class="comentario-input" id="input-comentario-${post.id}" placeholder="Comentar…">
+              <button class="btn-enviar" onclick="enviarComentario('${post.id}')">Enviar</button>
+            </div>
+          </div>`;
+        feedEl.appendChild(art);
+      }
+    }
+
+    async function toggleCurtida(postId, btnEl) {
+      const numEl = btnEl.querySelector(".num-curtidas");
+      const jaCurtiu = btnEl.classList.contains("curtido");
+      const atual = parseInt(numEl.textContent) || 0;
+      if (jaCurtiu) {
+        await supabaseClient.from("curtidas").delete().eq("post_id", postId).eq("user_id", usuarioAtual.id);
+        btnEl.classList.remove("curtido");
+        btnEl.innerHTML = `<span class="icon">🤍</span><span class="label num-curtidas">${atual - 1} curtidas</span>`;
+      } else {
+        await supabaseClient.from("curtidas").insert({ post_id: postId, user_id: usuarioAtual.id });
+        btnEl.classList.add("curtido");
+        btnEl.innerHTML = `<span class="icon">❤️</span><span class="label num-curtidas">${atual + 1} curtidas</span>`;
+      }
+    }
+
+    function toggleComentarios(postId) {
+      document.getElementById(`comentarios-${postId}`).classList.toggle("open");
+    }
+
+    async function enviarComentario(postId) {
+      const inputEl = document.getElementById(`input-comentario-${postId}`);
+      const texto = inputEl.value.trim();
+      if (!texto) return;
+      const { error } = await supabaseClient.from("comentarios")
+        .insert({ post_id: postId, user_id: usuarioAtual.id, texto });
+      if (error) { alert("Erro: " + error.message); return; }
+      inputEl.value = "";
+      const div = document.createElement("div");
+      div.className = "comentario-item";
+      div.innerHTML = `<strong>Você</strong> ${escapeHtml(texto)}`;
+      document.getElementById(`lista-${postId}`).appendChild(div);
+    }
+
+    function abrirLb(post) {
+      postAtual = post;
+      document.getElementById('lbImg').src = post.imagem_url;
+      document.getElementById('lbBg').style.backgroundImage = `url('${post.imagem_url}')`;
+      document.getElementById('lbUsername').textContent = post.username;
+      document.getElementById('lbDescricao').textContent = post.descricao;
+      document.getElementById('lbCnt').textContent = post.numCurtidas;
+      const btn = document.getElementById('lbBtnCurtir');
+      btn.classList.toggle('curtido', post.jaCurtiu);
+      btn.innerHTML = `${post.jaCurtiu ? '❤️' : '🤍'} <span class="cnt" id="lbCnt">${post.numCurtidas}</span>`;
+      document.getElementById('lbOverlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function fecharLb() {
+      document.getElementById('lbOverlay').classList.remove('open');
+      document.body.style.overflow = '';
+      postAtual = null;
+    }
+
+    function fecharLbOverlay(e) {
+      if (e.target === document.getElementById('lbOverlay')) fecharLb();
+    }
+
+    async function toggleCurtidaLb() {
+      if (!postAtual) return;
+      const btn = document.getElementById('lbBtnCurtir');
+      const jaCurtiu = btn.classList.contains('curtido');
+      const cntEl = document.getElementById('lbCnt');
+      const atual = parseInt(cntEl.textContent) || 0;
+      if (jaCurtiu) {
+        await supabaseClient.from('curtidas').delete()
+          .eq('post_id', postAtual.id).eq('user_id', usuarioAtual.id);
+        btn.classList.remove('curtido');
+        btn.innerHTML = `🤍 <span class="cnt" id="lbCnt">${atual - 1}</span>`;
+      } else {
+        await supabaseClient.from('curtidas').insert({ post_id: postAtual.id, user_id: usuarioAtual.id });
+        btn.classList.add('curtido');
+        btn.innerHTML = `❤️ <span class="cnt" id="lbCnt">${atual + 1}</span>`;
+      }
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+    }
+  </script>
+</body>
+</html>

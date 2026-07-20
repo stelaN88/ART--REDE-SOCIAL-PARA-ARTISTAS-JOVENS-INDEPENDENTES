@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>ART | Perfil</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f4f1;
+      --surface: #ffffff;
+      --border: #e8e6e0;
+      --text: #1a1a1a;
+      --text-muted: #888;
+      --accent: #1a1a1a;
+      --nav-height: 64px;
+      --radius-card: 12px;
+    }
+
+    html { -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: var(--nav-height);
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      height: 52px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-icon {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      transition: background .15s;
+      color: var(--text);
+    }
+    .btn-icon:active { background: var(--bg); }
+
+    .header-title {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .menu-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+    }
+    .menu-overlay.open { display: block; }
+
+    .menu-sheet {
+      position: absolute;
+      top: 52px;
+      right: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      min-width: 200px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.12);
+      animation: fadeDown .18s ease;
+    }
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 18px;
+      font-size: 14px;
+      cursor: pointer;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--text);
+      transition: background .15s;
+    }
+    .menu-item:hover { background: var(--bg); }
+    .menu-item + .menu-item { border-top: 1px solid var(--border); }
+    .menu-item.danger { color: #e0294a; }
+
+    .profile-section {
+      background: var(--surface);
+      padding: 20px 16px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .avatar-wrap {
+      position: relative;
+      width: 80px; height: 80px;
+    }
+
+    .avatar {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--border);
+      background: #e0ddd6;
+      display: block;
+    }
+
+    .stats-row {
+      display: flex;
+      gap: 32px;
+      align-items: center;
+    }
+
+    .stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .stat-icon-row {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .stat-icon { font-size: 18px; }
+
+    .stat-num {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .username-display {
+      font-size: 16px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .bio-display {
+      font-size: 13px;
+      color: var(--text-muted);
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    .btn-edit {
+      background: none;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 28px;
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      transition: background .15s, color .15s, border-color .15s;
+    }
+    .btn-edit:active { background: var(--bg); }
+
+    .btn-follow {
+      background: var(--accent);
+      border: 1.5px solid var(--accent);
+      color: #fff;
+      border-radius: 8px;
+      padding: 8px 28px;
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      transition: background .15s, color .15s;
+      min-width: 110px;
+    }
+    .btn-follow.following {
+      background: none;
+      color: var(--text);
+      border-color: var(--border);
+    }
+    .btn-follow:active { opacity: .8; }
+    .btn-follow:disabled { opacity: .6; cursor: not-allowed; }
+
+    .btn-chat {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      text-decoration: none;
+      transition: background .15s;
+    }
+    .btn-chat:active { background: var(--border); }
+
+    .grid {
+      padding: 8px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .grid-item {
+      border-radius: var(--radius-card);
+      overflow: hidden;
+      background: #e0ddd6;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .grid-img {
+      width: 100%;
+      aspect-ratio: 4 / 5;
+      object-fit: cover;
+      display: block;
+    }
+
+    .grid-placeholder {
+      width: 100%;
+      aspect-ratio: 4 / 5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #bbb;
+      font-size: 28px;
+    }
+
+    .grid-msg {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 48px 20px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .lightbox-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.88);
+      z-index: 300;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .lightbox-overlay.open { display: flex; }
+
+    .lightbox-inner {
+      position: relative;
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .lightbox-img {
+      width: 100%;
+      border-radius: 14px;
+      max-height: 80vh;
+      object-fit: contain;
+      display: block;
+    }
+
+    .lightbox-info {
+      margin-top: 12px;
+      color: #fff;
+    }
+
+    .lightbox-user {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .lightbox-desc {
+      font-size: 12px;
+      color: rgba(255,255,255,.7);
+      margin-top: 3px;
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: -14px;
+      right: -8px;
+      background: rgba(255,255,255,.15);
+      border: none;
+      border-radius: 50%;
+      width: 32px; height: 32px;
+      font-size: 18px;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      height: var(--nav-height);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      z-index: 100;
+    }
+
+    .nav-item {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      text-decoration: none;
+      font-size: 22px;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: color .2s, transform .15s;
+      background: none;
+      border: none;
+    }
+    .nav-item.active { color: var(--text); }
+    .nav-item:active { transform: scale(.88); }
+
+    .nav-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2.5px;
+      width: 18px; height: 18px;
+    }
+    .nav-grid span {
+      background: currentColor;
+      border-radius: 2px;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <div class="header-left">
+      <button class="btn-icon" onclick="history.back()">&#8592;</button>
+      <span class="header-title" id="headerTitle">perfil</span>
+    </div>
+    <div class="header-right" id="headerRight">
+      <button class="btn-icon" id="btnMenu" onclick="toggleMenu()">&#8943;</button>
+      <button class="btn-icon" onclick="window.location.href='index.html'">&#43;</button>
+      <button class="btn-icon">&#128269;</button>
+    </div>
+  </header>
+
+  <div class="menu-overlay" id="menuOverlay" onclick="fecharMenu(event)">
+    <div class="menu-sheet">
+      <button class="menu-item" onclick="window.location.href='edit-profile.html'">
+        ✏️ Editar perfil
+      </button>
+      <button class="menu-item" onclick="window.location.href='configuracoes.html'">
+        ⚙️ Configurações da conta
+      </button>
+      <button class="menu-item danger" onclick="sair()">
+        🚪 Sair
+      </button>
+    </div>
+  </div>
+
+  <section class="profile-section">
+    <img class="avatar" id="avatarImg" src="" alt="avatar"
+         onerror="this.src='https://ui-avatars.com/api/?name=U&background=e8e6e0&color=1a1a1a&size=80'">
+
+    <div class="stats-row">
+      <div class="stat">
+        <div class="stat-icon-row">
+          <span class="stat-icon">👥</span>
+          <span class="stat-num" id="numSeguidores">0</span>
+        </div>
+        <span class="stat-label">seguidores</span>
+      </div>
+      <div class="stat">
+        <div class="stat-icon-row">
+          <span class="stat-icon">❤️</span>
+          <span class="stat-num" id="numCurtidas">0</span>
+        </div>
+        <span class="stat-label">curtidas</span>
+      </div>
+    </div>
+
+    <div class="username-display" id="usernameDisplay">—</div>
+    <div class="bio-display" id="bioDisplay"></div>
+
+    <div id="actionBtnWrap">
+      <button class="btn-edit" onclick="window.location.href='edit-profile.html'">Editar perfil</button>
+    </div>
+  </section>
+
+  <section class="grid" id="grid">
+    <p class="grid-msg">Carregando...</p>
+  </section>
+
+  <div class="lightbox-overlay" id="lightbox" onclick="fecharLightbox(event)">
+    <div class="lightbox-inner">
+      <button class="lightbox-close" onclick="fecharLightboxBtn()">✕</button>
+      <img class="lightbox-img" id="lightboxImg" src="" alt="">
+      <div class="lightbox-info">
+        <div class="lightbox-user" id="lightboxUser"></div>
+        <div class="lightbox-desc" id="lightboxDesc"></div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a class="nav-item" href="index.html">🏠</a>
+    <a class="nav-item" href="search.html">🔍</a>
+    <a class="nav-item" href="index.html">
+      <div class="nav-grid"><span></span><span></span><span></span><span></span></div>
+    </a>
+    <a class="nav-item" href="#">🤍</a>
+    <a class="nav-item active" href="#">👤</a>
+  </nav>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script>
+    const sb = supabase.createClient(
+      "https://mgktoegtmuzrwxsbqaii.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1na3RvZWd0bXV6cnd4c2JxYWlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNTA0NDcsImV4cCI6MjA5MDcyNjQ0N30.vSkBfTvgyzRGxa8xQ2CwfNvIZjsAMOuTTvs7Ldyg9AU"
+    );
+
+    let usuario = null;
+    let usernameAtual = '';
+    let perfilId = null;
+    let souDono = true;
+    let jaSegue = false;
+
+    async function init() {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session?.user) { window.location.replace("login.html"); return; }
+      const data = { user: session.user };
+      usuario = data.user;
+
+      const params = new URLSearchParams(window.location.search);
+      const idDaUrl = params.get('id');
+      perfilId = idDaUrl || usuario.id;
+      souDono = perfilId === usuario.id;
+
+      ajustarHeaderEBotoes();
+      await carregarPerfil();
+      await carregarPosts();
+    }
+
+    function ajustarHeaderEBotoes() {
+      document.getElementById('headerTitle').textContent = souDono ? 'seu perfil' : 'perfil';
+      document.getElementById('btnMenu').style.display = souDono ? '' : 'none';
+
+      const wrap = document.getElementById('actionBtnWrap');
+      if (souDono) {
+        wrap.innerHTML = `<button class="btn-edit" onclick="window.location.href='edit-profile.html'">Editar perfil</button>`;
+      } else {
+        wrap.innerHTML = `
+          <div style="display:flex;gap:8px;align-items:center;">
+            <button class="btn-follow" id="btnFollow" onclick="toggleSeguir()">Seguir</button>
+            <a class="btn-chat" href="chat.html?id=${perfilId}">💬</a>
+          </div>`;
+      }
+    }
+
+    async function carregarPerfil() {
+      const { data: perfil } = await sb.from('perfis')
+        .select('username, bio, avatar_url, categoria')
+        .eq('user_id', perfilId)
+        .single();
+
+      if (perfil) {
+        usernameAtual = perfil.username || '';
+        document.getElementById('usernameDisplay').textContent = perfil.username || '—';
+        document.getElementById('bioDisplay').textContent = perfil.bio || '';
+        if (perfil.avatar_url) {
+          document.getElementById('avatarImg').src = perfil.avatar_url;
+        } else {
+          const inicial = (perfil.username || 'U')[0].toUpperCase();
+          document.getElementById('avatarImg').src =
+            `https://ui-avatars.com/api/?name=${inicial}&background=e8e6e0&color=1a1a1a&size=80`;
+        }
+      }
+
+      const { count: seguidores } = await sb.from('follows')
+        .select('*', { count: 'exact', head: true })
+        .eq('seguido_id', perfilId);
+      document.getElementById('numSeguidores').textContent = seguidores || 0;
+
+      const { count: curtidas } = await sb.from('curtidas')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', perfilId);
+      document.getElementById('numCurtidas').textContent = curtidas || 0;
+
+      if (!souDono) {
+        const { data: followRow } = await sb.from('follows')
+          .select('*')
+          .eq('seguidor_id', usuario.id)
+          .eq('seguido_id', perfilId)
+          .maybeSingle();
+        jaSegue = !!followRow;
+        atualizarBotaoSeguir();
+      }
+    }
+
+    function atualizarBotaoSeguir() {
+      const btn = document.getElementById('btnFollow');
+      if (!btn) return;
+      btn.textContent = jaSegue ? 'Seguindo' : 'Seguir';
+      btn.classList.toggle('following', jaSegue);
+    }
+
+    async function toggleSeguir() {
+      const btn = document.getElementById('btnFollow');
+      btn.disabled = true;
+      try {
+        if (jaSegue) {
+          await sb.from('follows').delete()
+            .eq('seguidor_id', usuario.id)
+            .eq('seguido_id', perfilId);
+          jaSegue = false;
+        } else {
+          await sb.from('follows').insert({
+            seguidor_id: usuario.id,
+            seguido_id: perfilId
+          });
+          jaSegue = true;
+        }
+        atualizarBotaoSeguir();
+        const { count } = await sb.from('follows')
+          .select('*', { count: 'exact', head: true })
+          .eq('seguido_id', perfilId);
+        document.getElementById('numSeguidores').textContent = count || 0;
+      } catch (err) {
+        alert('Erro: ' + err.message);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    async function carregarPosts() {
+      const gridEl = document.getElementById('grid');
+      const { data: posts, error } = await sb.from('posts')
+        .select('*')
+        .eq('user_id', perfilId)
+        .order('criado_em', { ascending: false });
+
+      if (error || !posts || posts.length === 0) {
+        gridEl.innerHTML = `<p class="grid-msg">${error ? 'Erro ao carregar.' : 'Nenhum post ainda. 🎨'}</p>`;
+        return;
+      }
+
+      gridEl.innerHTML = '';
+      posts.forEach(post => {
+        const item = document.createElement('div');
+        item.className = 'grid-item';
+        item.onclick = () => abrirLightbox(post);
+        if (post.imagem_url) {
+          item.innerHTML = `<img class="grid-img" src="${post.imagem_url}" alt="post" loading="lazy">`;
+        } else {
+          item.innerHTML = `<div class="grid-placeholder">🖼️</div>`;
+        }
+        gridEl.appendChild(item);
+      });
+    }
+
+    function abrirLightbox(post) {
+      document.getElementById('lightboxImg').src = post.imagem_url || '';
+      document.getElementById('lightboxUser').textContent = usernameAtual || 'Você';
+      document.getElementById('lightboxDesc').textContent = post.descricao || '';
+      document.getElementById('lightbox').classList.add('open');
+    }
+
+    function fecharLightbox(e) {
+      if (e.target === document.getElementById('lightbox')) {
+        document.getElementById('lightbox').classList.remove('open');
+      }
+    }
+
+    function fecharLightboxBtn() {
+      document.getElementById('lightbox').classList.remove('open');
+    }
+
+    function toggleMenu() {
+      document.getElementById('menuOverlay').classList.toggle('open');
+    }
+
+    function fecharMenu(e) {
+      if (e.target === document.getElementById('menuOverlay')) {
+        document.getElementById('menuOverlay').classList.remove('open');
+      }
+    }
+
+    async function sair() {
+      await sb.auth.signOut();
+      window.location.replace('login.html');
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+    }
+
+    init();
+  </script>
+</body>
+</html>

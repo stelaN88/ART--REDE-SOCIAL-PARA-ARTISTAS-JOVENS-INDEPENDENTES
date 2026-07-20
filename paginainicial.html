@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ART</title>
+  <link rel="stylesheet" href="splash.css">
+  <link rel="stylesheet" href="global.css">
+<link rel="stylesheet" href="layout.css">
+<link rel="stylesheet" href="componentes.css">
+
+</head>
+
+<body onclick="irParaLogin()">
+
+  <div class="splash">
+    <img src="imagens/logoart.jpeg" alt="Logo ART">
+  </div>
+
+  <script>
+     src="supabase.js"
+    function irParaLogin() {
+      window.location.href = "login.html";
+    }
+r
+    setTimeout(irParaLogin, 2500);
+    
+    const supabaseClient = supabase.createClient(
+  "https://mgktoegtmuzrwxsbqaii.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1na3RvZWd0bXV6cnd4c2JxYWlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNTA0NDcsImV4cCI6MjA5MDcyNjQ0N30.vSkBfTvgyzRGxa8xQ2CwfNvIZjsAMOuTTvs7Ldyg9AU"
+)
+
+  </script>
+
+</body>
+</html>

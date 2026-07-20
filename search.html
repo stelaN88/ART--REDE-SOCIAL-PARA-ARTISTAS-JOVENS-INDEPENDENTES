@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>ART | Buscar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f4f1;
+      --surface: #ffffff;
+      --border: #e8e6e0;
+      --text: #1a1a1a;
+      --text-muted: #888;
+      --accent: #1a1a1a;
+      --search-bg: #f4e87c;
+      --nav-height: 64px;
+      --radius-card: 14px;
+    }
+
+    html { -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: var(--nav-height);
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .search-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--bg);
+      padding: 14px 16px 10px;
+    }
+
+    .search-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--search-bg);
+      border-radius: 22px;
+      padding: 11px 16px;
+    }
+
+    .search-icon { font-size: 15px; opacity: .6; }
+
+    .search-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: var(--text);
+    }
+    .search-input::placeholder { color: rgba(26,26,26,.5); }
+
+    .clear-btn {
+      border: none;
+      background: rgba(0,0,0,.12);
+      border-radius: 50%;
+      width: 20px; height: 20px;
+      font-size: 12px;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      color: var(--text);
+    }
+    .clear-btn.visible { display: flex; }
+
+    /* ── RESULTADOS DE USUÁRIOS ──────────────────────── */
+    .user-results {
+      display: none;
+      flex-direction: column;
+      background: var(--surface);
+      margin: 0 16px;
+      border-radius: var(--radius-card);
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,0,0,.05);
+    }
+    .user-results.open { display: flex; }
+
+    .user-result-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 14px;
+      text-decoration: none;
+      color: inherit;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .user-result-item:hover { background: var(--bg); }
+    .user-result-item + .user-result-item { border-top: 1px solid var(--border); }
+
+    .user-result-avatar {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #e0ddd6;
+      flex-shrink: 0;
+    }
+
+    .user-result-info { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+    .user-result-name {
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .user-result-cat {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .search-msg {
+      padding: 16px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    /* ── GRADE DE DESCOBERTA (masonry simples 2 colunas) ── */
+    .discover-grid {
+      padding: 14px 12px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .discover-col {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .discover-item {
+      position: relative;
+      border-radius: var(--radius-card);
+      overflow: hidden;
+      cursor: pointer;
+      background: #e0ddd6;
+    }
+
+    .discover-img {
+      width: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    .play-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .play-circle {
+      width: 46px; height: 46px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.92);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: #2bb6a3;
+      box-shadow: 0 2px 10px rgba(0,0,0,.18);
+    }
+
+    .feed-msg {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 48px 20px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* ── LIGHTBOX ─────────────────────────────────────── */
+    .lightbox-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.88);
+      z-index: 300;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .lightbox-overlay.open { display: flex; }
+
+    .lightbox-inner { position: relative; width: 100%; max-width: 420px; }
+    .lightbox-img, .lightbox-video {
+      width: 100%;
+      border-radius: 14px;
+      max-height: 80vh;
+      object-fit: contain;
+      display: block;
+      background: #000;
+    }
+
+    .lightbox-info { margin-top: 12px; color: #fff; }
+    .lightbox-user { font-size: 13px; font-weight: 700; }
+    .lightbox-desc { font-size: 12px; color: rgba(255,255,255,.7); margin-top: 3px; }
+
+    .lightbox-close {
+      position: absolute;
+      top: -14px; right: -8px;
+      background: rgba(255,255,255,.15);
+      border: none;
+      border-radius: 50%;
+      width: 32px; height: 32px;
+      font-size: 18px;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ── BOTTOM NAV ───────────────────────────────────── */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      height: var(--nav-height);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      z-index: 100;
+    }
+    .nav-item {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      text-decoration: none;
+      font-size: 22px;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: color .2s, transform .15s;
+      background: none;
+      border: none;
+    }
+    .nav-item.active { color: var(--text); }
+    .nav-item:active { transform: scale(.88); }
+    .nav-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2.5px;
+      width: 18px; height: 18px;
+    }
+    .nav-grid span { background: currentColor; border-radius: 2px; display: block; }
+  </style>
+</head>
+<body>
+
+  <div class="search-header">
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" id="searchInput" type="text" placeholder="procurar..." oninput="onSearchInput()">
+      <button class="clear-btn" id="clearBtn" onclick="limparBusca()">✕</button>
+    </div>
+  </div>
+
+  <div class="user-results" id="userResults"></div>
+
+  <section class="discover-grid" id="discoverGrid">
+    <div class="discover-col" id="colA"></div>
+    <div class="discover-col" id="colB"></div>
+  </section>
+
+  <div class="lightbox-overlay" id="lightbox" onclick="fecharLightbox(event)">
+    <div class="lightbox-inner">
+      <button class="lightbox-close" onclick="fecharLightboxBtn()">✕</button>
+      <img class="lightbox-img" id="lightboxImg" src="" alt="" style="display:none;">
+      <video class="lightbox-video" id="lightboxVideo" controls autoplay style="display:none;"></video>
+      <div class="lightbox-info">
+        <div class="lightbox-user" id="lightboxUser"></div>
+        <div class="lightbox-desc" id="lightboxDesc"></div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a class="nav-item" href="index.html">🏠</a>
+    <a class="nav-item active" href="search.html">🔍</a>
+    <a class="nav-item" href="index.html">
+      <div class="nav-grid"><span></span><span></span><span></span><span></span></div>
+    </a>
+    <a class="nav-item" href="#">🤍</a>
+    <a class="nav-item" href="perfil.html">👤</a>
+  </nav>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script>
+    const sb = supabase.createClient(
+      "https://mgktoegtmuzrwxsbqaii.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1na3RvZWd0bXV6cnd4c2JxYWlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNTA0NDcsImV4cCI6MjA5MDcyNjQ0N30.vSkBfTvgyzRGxa8xQ2CwfNvIZjsAMOuTTvs7Ldyg9AU"
+    );
+
+    let usuario = null;
+    let debounceTimer = null;
+
+    async function init() {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session?.user) { window.location.replace("login.html"); return; }
+      const data = { user: session.user };
+      usuario = data.user;
+      await carregarDescobrir();
+    }
+
+    /* ── BUSCA DE USUÁRIOS ────────────────────────────── */
+    function onSearchInput() {
+      const termo = document.getElementById('searchInput').value.trim();
+      document.getElementById('clearBtn').classList.toggle('visible', termo.length > 0);
+
+      clearTimeout(debounceTimer);
+      if (!termo) {
+        document.getElementById('userResults').classList.remove('open');
+        document.getElementById('discoverGrid').style.display = 'grid';
+        return;
+      }
+      document.getElementById('discoverGrid').style.display = 'none';
+      debounceTimer = setTimeout(() => buscarUsuarios(termo), 300);
+    }
+
+    async function buscarUsuarios(termo) {
+      const el = document.getElementById('userResults');
+      el.classList.add('open');
+      el.innerHTML = `<p class="search-msg">Buscando...</p>`;
+
+      const { data: perfis, error } = await sb.from('perfis')
+        .select('user_id, username, categoria, avatar_url')
+        .ilike('username', `%${termo}%`)
+        .neq('user_id', usuario.id)
+        .limit(20);
+
+      if (error || !perfis || perfis.length === 0) {
+        el.innerHTML = `<p class="search-msg">Nenhum usuário encontrado.</p>`;
+        return;
+      }
+
+      el.innerHTML = '';
+      perfis.forEach(p => {
+        const inicial = (p.username || 'U')[0].toUpperCase();
+        const avatar = p.avatar_url || `https://ui-avatars.com/api/?name=${inicial}&background=e8e6e0&color=1a1a1a`;
+        const a = document.createElement('a');
+        a.className = 'user-result-item';
+        a.href = `perfil.html?id=${encodeURIComponent(p.user_id)}`;
+        a.innerHTML = `
+          <img class="user-result-avatar" src="${avatar}"
+               onerror="this.src='https://ui-avatars.com/api/?name=${inicial}&background=e8e6e0&color=1a1a1a'">
+          <div class="user-result-info">
+            <span class="user-result-name">${escapeHtml(p.username || 'usuário')}</span>
+            ${p.categoria ? `<span class="user-result-cat">${escapeHtml(p.categoria)}</span>` : ''}
+          </div>`;
+        el.appendChild(a);
+      });
+    }
+
+    function limparBusca() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('clearBtn').classList.remove('visible');
+      document.getElementById('userResults').classList.remove('open');
+      document.getElementById('discoverGrid').style.display = 'grid';
+    }
+
+    /* ── GRADE DE DESCOBERTA ──────────────────────────── */
+    async function carregarDescobrir() {
+      const colA = document.getElementById('colA');
+      const colB = document.getElementById('colB');
+      colA.innerHTML = ''; colB.innerHTML = '';
+
+      const { data: posts, error } = await sb.from('posts')
+        .select('*')
+        .order('criado_em', { ascending: false })
+        .limit(40);
+
+      if (error || !posts || posts.length === 0) {
+        document.getElementById('discoverGrid').innerHTML =
+          `<p class="feed-msg">${error ? 'Erro ao carregar.' : 'Nenhum post ainda.'}</p>`;
+        return;
+      }
+
+      // embaralha para efeito "explorar"
+      const embaralhados = posts.sort(() => Math.random() - 0.5);
+
+      embaralhados.forEach((post, i) => {
+        const isVideo = post.tipo_midia === 'video';
+        const item = document.createElement('div');
+        item.className = 'discover-item';
+        item.onclick = () => abrirLightbox(post, isVideo);
+
+        const alturaAleatoria = 130 + Math.floor(Math.random() * 90);
+        const midiaHtml = isVideo
+          ? `<img class="discover-img" style="height:${alturaAleatoria}px" src="${post.thumbnail_url || post.imagem_url || ''}" alt="" loading="lazy">
+             <div class="play-overlay"><div class="play-circle">▶</div></div>`
+          : `<img class="discover-img" style="height:${alturaAleatoria}px" src="${post.imagem_url || ''}" alt="" loading="lazy">`;
+
+        item.innerHTML = midiaHtml;
+        (i % 2 === 0 ? colA : colB).appendChild(item);
+      });
+    }
+
+    function abrirLightbox(post, isVideo) {
+      const lb = document.getElementById('lightbox');
+      const img = document.getElementById('lightboxImg');
+      const vid = document.getElementById('lightboxVideo');
+
+      if (isVideo && post.video_url) {
+        img.style.display = 'none';
+        vid.style.display = 'block';
+        vid.src = post.video_url;
+      } else {
+        vid.style.display = 'none';
+        vid.pause && vid.pause();
+        img.style.display = 'block';
+        img.src = post.imagem_url || '';
+      }
+
+      document.getElementById('lightboxUser').textContent = post.username || 'usuário';
+      document.getElementById('lightboxDesc').textContent = post.descricao || '';
+      lb.classList.add('open');
+    }
+
+    function fecharLightbox(e) {
+      if (e.target === document.getElementById('lightbox')) fecharLightboxBtn();
+    }
+    function fecharLightboxBtn() {
+      const vid = document.getElementById('lightboxVideo');
+      vid.pause(); vid.src = '';
+      document.getElementById('lightbox').classList.remove('open');
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+    }
+
+    init();
+  </script>
+</body>
+</html>

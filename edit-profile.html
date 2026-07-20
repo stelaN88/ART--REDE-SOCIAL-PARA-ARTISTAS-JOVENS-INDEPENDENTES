@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>ART | Editar Perfil</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --text: #1a1a1a;
+      --text-muted: #888;
+      --radius: 25px;
+    }
+
+    html { -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      max-width: 480px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      background: url("imagens/tinta.jpeg") center / cover no-repeat fixed;
+      color: var(--text);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      backdrop-filter: blur(14px);
+      background: rgba(255,255,255,.18);
+      z-index: 0;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 20px 48px;
+      min-height: 100vh;
+    }
+
+    .back-btn {
+      align-self: flex-start;
+      background: none;
+      border: none;
+      font-size: 22px;
+      cursor: pointer;
+      color: var(--text);
+      padding: 4px;
+      margin-bottom: 8px;
+    }
+
+    .profile-photo {
+      margin: 8px 0 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .avatar-wrap {
+      position: relative;
+      width: 100px; height: 100px;
+      cursor: pointer;
+    }
+
+    .avatar {
+      width: 100px; height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #bbb;
+      display: block;
+      border: 3px solid rgba(255,255,255,.7);
+    }
+
+    .avatar-overlay {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: rgba(0,0,0,.28);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity .2s;
+    }
+    .avatar-wrap:hover .avatar-overlay { opacity: 1; }
+    .avatar-overlay span { font-size: 24px; }
+
+    .link-text {
+      font-size: 13px;
+      cursor: pointer;
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    input[type="file"] { display: none; }
+
+    .form {
+      width: 100%;
+      max-width: 420px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-top: 20px;
+    }
+
+    .form label {
+      font-size: 12px;
+      font-weight: 600;
+      padding-left: 4px;
+      margin-top: 8px;
+      color: var(--text);
+    }
+
+    .input {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      border: none;
+      outline: none;
+      background: rgba(255,255,255,.82);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: var(--text);
+      transition: background .2s;
+    }
+    .input:focus { background: rgba(255,255,255,.96); }
+    .input::placeholder { color: #aaa; }
+
+    .textarea {
+      height: 90px;
+      resize: none;
+      border-radius: 15px;
+      padding-top: 10px;
+    }
+
+    .btn-confirmar {
+      width: 100%;
+      padding: 14px;
+      border-radius: var(--radius);
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 14px;
+      font-family: 'DM Sans', sans-serif;
+      letter-spacing: .04em;
+      background: linear-gradient(90deg, #FFD54F, #FFB300);
+      color: #1a1a1a;
+      margin-top: 24px;
+      transition: opacity .2s, transform .15s;
+    }
+    .btn-confirmar:active { transform: scale(.97); opacity: .85; }
+    .btn-confirmar:disabled { opacity: .6; cursor: not-allowed; }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #1a1a1a;
+      color: #fff;
+      padding: 10px 22px;
+      border-radius: 20px;
+      font-size: 13px;
+      z-index: 999;
+      transition: transform .3s cubic-bezier(.22,1,.36,1);
+      white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+  <div class="page">
+    <button class="back-btn" onclick="history.back()">&#8592;</button>
+
+    <div class="profile-photo">
+      <div class="avatar-wrap" onclick="document.getElementById('inputAvatar').click()">
+        <img class="avatar" id="avatarImg" src="" alt="avatar"
+             onerror="this.src='https://ui-avatars.com/api/?name=U&background=bbb&color=fff&size=100'">
+        <div class="avatar-overlay"><span>📷</span></div>
+      </div>
+      <input type="file" id="inputAvatar" accept="image/*" onchange="previewAvatar(event)">
+      <span class="link-text" onclick="document.getElementById('inputAvatar').click()">Mudar foto</span>
+    </div>
+
+    <div class="form">
+      <label>Nome</label>
+      <input class="input" id="inputNome" type="text" placeholder="Seu nome">
+
+      <label>Nome de usuário</label>
+      <input class="input" id="inputUsername" type="text" placeholder="seu_usuario">
+
+      <label>Categoria</label>
+      <input class="input" id="inputCategoria" type="text" placeholder="Ex: Pintura, Fotografia...">
+
+      <label>Biografia</label>
+      <textarea class="input textarea" id="inputBio" placeholder="..."></textarea>
+
+      <button class="btn-confirmar" id="btnConfirmar" onclick="salvarPerfil()">CONFIRMAR</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script>
+    const sb = supabase.createClient(
+      "https://mgktoegtmuzrwxsbqaii.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1na3RvZWd0bXV6cnd4c2JxYWlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNTA0NDcsImV4cCI6MjA5MDcyNjQ0N30.vSkBfTvgyzRGxa8xQ2CwfNvIZjsAMOuTTvs7Ldyg9AU"
+    );
+
+    let usuario = null;
+    let novoArquivoAvatar = null;
+
+    async function init() {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session?.user) { window.location.replace("login.html"); return; }
+      const data = { user: session.user };
+      usuario = data.user;
+      await carregarPerfil();
+    }
+
+    async function carregarPerfil() {
+      const { data: perfil } = await sb.from('perfis')
+        .select('username, bio, avatar_url, categoria')
+        .eq('user_id', usuario.id)
+        .single();
+
+      if (!perfil) return;
+
+      document.getElementById('inputNome').value = perfil.username || '';
+      document.getElementById('inputUsername').value = perfil.username || '';
+      document.getElementById('inputCategoria').value = perfil.categoria || '';
+      document.getElementById('inputBio').value = perfil.bio || '';
+
+      if (perfil.avatar_url) {
+        document.getElementById('avatarImg').src = perfil.avatar_url;
+      } else {
+        const inicial = (perfil.username || 'U')[0].toUpperCase();
+        document.getElementById('avatarImg').src =
+          `https://ui-avatars.com/api/?name=${inicial}&background=bbb&color=fff&size=100`;
+      }
+    }
+
+    function previewAvatar(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      novoArquivoAvatar = file;
+      const reader = new FileReader();
+      reader.onload = e => { document.getElementById('avatarImg').src = e.target.result; };
+      reader.readAsDataURL(file);
+    }
+
+    async function salvarPerfil() {
+      const btn = document.getElementById('btnConfirmar');
+      btn.disabled = true;
+      btn.textContent = 'Salvando...';
+
+      try {
+        let avatar_url = null;
+
+        if (novoArquivoAvatar) {
+          const nome = `avatar_${usuario.id}_${Date.now()}`;
+          const { error: upErr } = await sb.storage.from('posts').upload(nome, novoArquivoAvatar, { upsert: true });
+          if (upErr) throw upErr;
+          const { data: urlData } = sb.storage.from('posts').getPublicUrl(nome);
+          avatar_url = urlData.publicUrl;
+        }
+
+        const updates = {
+          user_id: usuario.id,
+          username: document.getElementById('inputUsername').value.trim(),
+          bio: document.getElementById('inputBio').value.trim(),
+          categoria: document.getElementById('inputCategoria').value.trim(),
+        };
+        if (avatar_url) updates.avatar_url = avatar_url;
+
+        const { error } = await sb.from('perfis').upsert(updates, { onConflict: 'user_id' });
+        if (error) throw error;
+
+        mostrarToast('Perfil salvo! ✓');
+        setTimeout(() => window.location.href = 'perfil.html', 1200);
+      } catch (err) {
+        mostrarToast('Erro: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'CONFIRMAR';
+      }
+    }
+
+    function mostrarToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2800);
+    }
+
+    init();
+  </script>
+</body>
+</html>
