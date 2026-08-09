@@ -1,4 +1,4 @@
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
@@ -409,6 +409,24 @@
     .empty-state .empty-icon { font-size: 38px; margin-bottom: 10px; }
     .empty-state p { font-size: 13px; }
 
+
+    /* ── MARCA D'ÁGUA ─────────────────────────────── */
+    .post-img-wrap {
+      position: relative;
+    }
+    .watermark {
+      position: absolute;
+      bottom: 6px;
+      right: 8px;
+      color: rgba(255,255,255,0.55);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .04em;
+      pointer-events: none;
+      text-shadow: 0 1px 3px rgba(0,0,0,.5);
+      user-select: none;
+    }
+
     /* ── LIGHTBOX ─────────────────────────────────────── */
     .lb-overlay {
       display: none;
@@ -700,7 +718,7 @@
 
       const { data: curtidas } = await supabaseClient
         .from("curtidas").select("post_id").eq("user_id", usuarioAtual.id);
-      const curtidasSet = new Set((curtidas || []).map(c => c.post_id));
+      const curtidasSet = new Set((curtidas || []).map(c => String(c.post_id)));
 
       // busca usernames de todos os autores dos posts
       const userIds = [...new Set(posts.map(p => p.user_id))];
@@ -718,7 +736,7 @@
         const { data: comentarios } = await supabaseClient
           .from("comentarios").select("*").eq("post_id", post.id).order("criado_em", { ascending: true });
 
-        const jaCurtiu = curtidasSet.has(post.id);
+        const jaCurtiu = curtidasSet.has(String(post.id));
         const perfilAutor = perfilMap[post.user_id];
         const label = post.user_id === usuarioAtual.id ? "Você"
           : (perfilAutor?.username || "usuário");
@@ -726,7 +744,7 @@
         const comentariosHtml = (comentarios || []).map(c => `
           <div class="comentario-item">
             <strong>${c.user_id === usuarioAtual.id ? "Você" : c.user_id.substring(0, 8) + "…"}</strong>
-            ${escapeHtml(c.texto)}
+            ${escapeHtml(c.texto || '')}
           </div>`).join("");
 
         const dadosPost = JSON.stringify({
@@ -747,6 +765,7 @@
             ${post.imagem_url
               ? `<img class="post-img" src="${post.imagem_url}" alt="post" loading="lazy">`
               : `<div class="post-img" style="display:flex;align-items:center;justify-content:center;color:#bbb;font-size:11px;">sem imagem</div>`}
+            <span class="watermark">ART ✦ ${escapeHtml(label)}</span>
           </div>
           <div class="post-footer">
             <div class="post-username">${escapeHtml(label)}</div>
